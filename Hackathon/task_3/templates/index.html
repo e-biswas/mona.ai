@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Tracking</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+    <h1>Emergency Response Resources</h1>
+    <div id="map"></div>
+    <table id="resource-table">
+        <thead>
+            <tr>
+                <th>Resource ID</th>
+                <th>Name</th>
+                <th>Vicinity</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Status</th>
+                <th>Last Updated</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        $(document).ready(function () {
+            console.log("Document is ready. Initializing map...");
+
+            const map = L.map('map').setView([49.3964, 7.0245], 10);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+            }).addTo(map);
+
+            function loadResources() {
+                console.log("Loading resources...");
+                $.getJSON('/api/resources', function (data) {
+                    console.log("Resources data loaded:", data);
+
+                    var rows = '';
+                    data.forEach(resource => {
+                        rows += `<tr>
+                            <td>${resource['place_id']}</td>
+                            <td>${resource['name']}</td>
+                            <td>${resource['vicinity']}</td>
+                            <td>${resource['geometry/location/lat']}</td>
+                            <td>${resource['geometry/location/lng']}</td>
+                            <td>${resource['business_status']}</td>
+                            <td>${resource['last_updated']}</td>
+                            <td>
+                                <button onclick="updateStatus('${resource['place_id']}')">Update Status</button>
+                                <button onclick="updateLocation('${resource['place_id']}')">Update Location</button>
+                            </td>
+                        </tr>`;
+                        const marker = L.marker([resource['geometry/location/lat'], resource['geometry/location/lng']])
+                            .addTo(map)
+                            .bindPopup(`${resource['name']} - ${resource['business_status']}`)
+                            .openPopup();
+                    });
+                    $('#resource-table tbody').html(rows);
+                }).fail(function(jqXHR, textStatus, errorThrown) {
+                    console.error("Error loading resources: " + textStatus + ", " + errorThrown);
+                });
+            }
+
+            loadResources();
+
+            window.updateStatus = function (resourceId) {
+                const newStatus = prompt("Enter new status:");
+                if (newStatus) {
+                    console.log("Updating status for resource ID:", resourceId);
+                    $.ajax({
+                        url: '/api/update_status',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ 'resource_id': resourceId, 'new_status': newStatus }),
+                        success: function (response) {
+                            console.log("Status updated successfully:", response);
+                            loadResources();
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error("Error updating status: " + textStatus + ", " + errorThrown);
+                        }
+                    });
+                }
+            }
+
+            window.updateLocation = function (resourceId) {
+                const newLat = prompt("Enter new latitude:");
+                const newLng = prompt("Enter new longitude:");
+                if (newLat && newLng) {
+                    console.log("Updating location for resource ID:", resourceId);
+                    $.ajax({
+                        url: '/api/update_location',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ 'resource_id': resourceId, 'new_location': [newLat, newLng] }),
+                        success: function (response) {
+                            console.log("Location updated successfully:", response);
+                            loadResources();
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error("Error updating location: " + textStatus + ", " + errorThrown);
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

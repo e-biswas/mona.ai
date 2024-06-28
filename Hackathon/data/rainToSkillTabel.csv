@@ -1,0 +1,21 @@
+﻿Weather Description;Required Skill Level;amount of rain
+broken clouds;Basic Skills;0
+drizzle;Intermediate Skills;0.1 - 0.5
+few clouds;Basic Skills;0
+fog;Advanced Skills;0 - 0.2
+heavy intensity rain;Advanced Skills;> 10
+heavy intensity shower rain;Advanced Skills;> 10
+light intensity drizzle;Basic Skills;0.1 - 0.3
+light intensity drizzle rain;Basic Skills;0.1 - 0.3
+light intensity shower rain;Basic Skills;0.1 - 2
+light rain;Basic Skills;0.5 - 2
+light snow;Intermediate Skills;-
+mist;Intermediate Skills;0 - 0.1
+moderate rain;Intermediate Skills;2-10
+overcast clouds;Intermediate Skills;0
+rain and drizzle;Intermediate Skills;0.5 - 5
+scattered clouds;Basic Skills;0
+shower rain;Intermediate Skills;2-10
+sky is clear;Basic Skills;0
+thunderstorm with light rain;Advanced Skills;10-20
+thunderstorm with rain;Advanced Skills;20 - 50
